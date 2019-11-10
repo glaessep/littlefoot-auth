@@ -80,7 +80,7 @@ router.get('/signin', (req, res) => {
       result = JSON.stringify(r.headers);
       if (r.resources) {
         for (var queryResult of r.resources) {
-          var resultString = JSON.stringify(queryResult);
+          let resultString = JSON.stringify(queryResult);
           console.log(`\tQuery returned ${resultString}\n`);
         }
       } else {
