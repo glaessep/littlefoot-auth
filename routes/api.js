@@ -8,6 +8,26 @@ const {
 
 const config = require('../config');
 
+async function createUser(data) {
+  const account = {
+    email: data.email,
+    pwd: data.pwd,
+    salt: data.salt
+  };
+
+  const { item } = await config.database
+    .container(config.AccountsContainerId)
+    .items.upsert(account);
+}
+
+async function findUser(userId, resultFunc) {
+  resultFunc(false, {});
+}
+
+function verifyPassword(userData, password) {
+  return true;
+}
+
 const router = express.Router();
 
 passport.use(
@@ -55,7 +75,7 @@ router.get('/signup', (req, res) => {
 router.get('/signin', (req, res) => {
   console.log(`config.database.id: ${config.database.id}`);
 
-  const container = config.database.container(config.UsersContainerID);
+  const container = config.database.container(config.UsersContainerId);
   console.log(`container.id: ${container.id}`);
 
   // query to return all children in a family
@@ -72,14 +92,14 @@ router.get('/signin', (req, res) => {
   console.log(`Starting query\n`);
   let result = '';
   config.database
-    .container(config.UsersContainerID)
+    .container(config.UsersContainerId)
     .items.query(querySpec, { enableCrossPartitionQuery: true })
     .fetchAll()
     .then(r => {
       // console.log(`${JSON.stringify(r)}`);
       result = JSON.stringify(r.headers);
       if (r.resources) {
-        for (var queryResult of r.resources) {
+        for (let queryResult of r.resources) {
           let resultString = JSON.stringify(queryResult);
           console.log(`\tQuery returned ${resultString}\n`);
         }
