@@ -1,34 +1,89 @@
-/* eslint-disable no-console */
+const debug = require('debug')('littlefoot-server:api');
+const bcrypt = require('bcrypt');
+const uuid = require('uuid/v4');
 const express = require('express');
 const passport = require('passport');
+const { Strategy: LocalStrategy } = require('passport-local');
 const { BasicStrategy } = require('passport-http');
-const {
-  Strategy: ClientPasswordStrategy
-} = require('passport-oauth2-client-password');
+const { Strategy: BearerStrategy } = require('passport-http-bearer');
 
 const config = require('../config');
+const { genError, isError, genResponse, requestCharge } = require('./utils');
 
-async function createUser(data) {
-  const account = {
-    email: data.email,
-    pwd: data.pwd,
-    salt: data.salt
+const db = config.database;
+const router = express.Router();
+
+async function findUser(email) {
+  const query = {
+    query: 'SELECT * FROM r WHERE r.email=@email',
+    parameters: [{ name: '@email', value: `${email}` }]
   };
 
-  const { item } = await config.database
+  const result = await db
     .container(config.AccountsContainerId)
-    .items.upsert(account);
+    .items.query(query)
+    .fetchAll();
+
+  return genResponse(result, true);
 }
 
-async function findUser(userId, resultFunc) {
-  resultFunc(false, {});
+async function createUser(email, password, salt) {
+  try {
+    const user = await findUser(email);
+
+    if (user.data.length > 0) {
+      user.done = false;
+      return user;
+    }
+
+    const account = {
+      email,
+      pwd: password,
+      salt
+    };
+
+    const newUser = await config.database.container(config.AccountsContainerId).items.upsert(account);
+    return genResponse(newUser, true, user.charge);
+  } catch (e) {
+    return genError(e);
+  }
 }
 
 function verifyPassword(userData, password) {
   return true;
 }
 
-const router = express.Router();
+passport.use(
+  new LocalStrategy({ usernameField: 'email' }, (username, password, done) => {
+    return done(null, {});
+    // User.findOne({ username: username }, function(err, user) {
+    //   if (err) {
+    //     return done(err);
+    //   }
+    //   if (!user) {
+    //     return done(null, false);
+    //   }
+    //   if (!user.verifyPassword(password)) {
+    //     return done(null, false);
+    //   }
+    //   return done(null, user);
+    // });
+  })
+);
+
+passport.use(
+  new BearerStrategy((token, done) => {
+    // User.findOne({ token: token }, function(err, user) {
+    //   if (err) {
+    //     return done(err);
+    //   }
+    //   if (!user) {
+    //     return done(null, false);
+    //   }
+    //   return done(null, user, { scope: 'all' });
+    // });
+  })
+);
 
 passport.use(
   new BasicStrategy((userid, password, done) => {
@@ -49,74 +104,21 @@ passport.use(
   })
 );
 
-passport.use(
-  new ClientPasswordStrategy((clientId, clientSecret, done) => {
-    /*
-    Clients.findOne({ clientId: clientId }, (err, client) => {
-      if (err) {
-        return done(err);
-      }
-      if (!client) {
-        return done(null, false);
-      }
-      if (client.clientSecret != clientSecret) {
-        return done(null, false);
-      }
-      return done(null, client);
-    });
-    */
-  })
-);
-
-router.get('/signup', (req, res) => {
-  res.send('Sign Up');
+router.post('/signup', (req, res) => {
+  const { email, password, salt } = req.body;
+  (async () => {
+    const result = await createUser(email, password, salt);
+    res.send(result);
+  })();
 });
 
-router.get('/signin', (req, res) => {
-  console.log(`config.database.id: ${config.database.id}`);
+router.get('/signup', (req, res) => {});
 
-  const container = config.database.container(config.UsersContainerId);
-  console.log(`container.id: ${container.id}`);
-
-  // query to return all children in a family
-  const querySpec = {
-    query: 'SELECT * FROM root r',
-    parameters: [
-      {
-        name: '@type',
-        value: 'user'
-      }
-    ]
-  };
-
-  console.log(`Starting query\n`);
-  let result = '';
-  config.database
-    .container(config.UsersContainerId)
-    .items.query(querySpec, { enableCrossPartitionQuery: true })
-    .fetchAll()
-    .then(r => {
-      // console.log(`${JSON.stringify(r)}`);
-      result = JSON.stringify(r.headers);
-      if (r.resources) {
-        for (let queryResult of r.resources) {
-          let resultString = JSON.stringify(queryResult);
-          console.log(`\tQuery returned ${resultString}\n`);
-        }
-      } else {
-        console.log(`Error!\n`);
-      }
-    })
-    .catch(error => {
-      console.log(`${JSON.stringify(error)}`);
-    });
-
-  res.send({ result: `${result}` });
-});
+router.get('/signin', (req, res) => {});
 
 router.post(
   '/signin',
-  passport.authenticate(['basic', 'oauth2-client-password'], {
+  passport.authenticate(['local'], {
     session: false
   }),
   (req, res) => {

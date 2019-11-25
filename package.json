@@ -8,9 +8,11 @@
   },
   "dependencies": {
     "@azure/cosmos": "^3.3.6",
+    "bcrypt": "^3.0.6",
     "cookie-parser": "~1.4.3",
     "csprng": "^0.1.2",
     "debug": "~2.6.9",
+    "ejs": "^2.7.2",
     "eslint": "6.1.0",
     "eslint-config-airbnb": "18.0.1",
     "eslint-config-prettier": "^6.1.0",
@@ -19,9 +21,14 @@
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-react-hooks": "^1.7.0",
     "express": "~4.16.0",
+    "fetchival": "^0.3.3",
     "morgan": "~1.9.0",
+    "node-fetch": "^2.6.0",
     "passport": "^0.4.0",
     "passport-http": "^0.3.0",
-    "passport-oauth2-client-password": "^0.1.2"
+    "passport-http-bearer": "^1.0.1",
+    "passport-local": "^1.0.0",
+    "passport-oauth2-client-password": "^0.1.2",
+    "uuid": "^3.3.3"
   }
 }
