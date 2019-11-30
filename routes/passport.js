@@ -1,57 +1,38 @@
 const passport = require('passport');
-const { Strategy: LocalStrategy } = require('passport-local');
-const { BasicStrategy } = require('passport-http');
-const { Strategy: BearerStrategy } = require('passport-http-bearer');
+const LocalStrategy = require('passport-local').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy;
+const { ExtractJwt } = require('passport-jwt');
+
+const config = require('../utils/config');
+const crypto = require('../utils/crypto');
+const { findAccount } = require('../models/account');
 
 passport.use(
-  new LocalStrategy({ usernameField: 'email' }, (username, password, done) => {
-    return done(null, {});
-    // User.findOne({ username: username }, function(err, user) {
-    //   if (err) {
-    //     return done(err);
-    //   }
-    //   if (!user) {
-    //     return done(null, false);
-    //   }
-    //   if (!user.verifyPassword(password)) {
-    //     return done(null, false);
-    //   }
-    //   return done(null, user);
-    // });
+  new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
+    findAccount(email)
+      .then(user => {
+        if (user.data.length === 0) {
+          return done(null, false);
+        }
+        const same = crypto.compare(password, user.encrypted);
+        if (same) {
+          return done(null, user);
+        }
+        return done(null, false);
+      })
+      .catch(e => {
+        return done(e);
+      });
   })
 );
 
 passport.use(
-  new BearerStrategy((token, done) => {
-    // User.findOne({ token: token }, function(err, user) {
-    //   if (err) {
-    //     return done(err);
-    //   }
-    //   if (!user) {
-    //     return done(null, false);
-    //   }
-    //   return done(null, user, { scope: 'all' });
-    // });
-  })
-);
-
-passport.use(
-  new BasicStrategy((userid, password, done) => {
-    /*
-    User.findOne({ username: userid }, (err, user) => {
-      if (err) {
-        return done(err);
-      }
-      if (!user) {
-        return done(null, false);
-      }
-      if (!user.verifyPassword(password)) {
-        return done(null, false);
-      }
-      return done(null, user);
-    });
-    */
-  })
+  new JwtStrategy(
+    { secretOrKey: config.TokenSecret, jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken() },
+    (payload, done) => {
+      return done(null, { email: payload.email, userID: payload.sub });
+    }
+  )
 );
 
 module.exports = passport;

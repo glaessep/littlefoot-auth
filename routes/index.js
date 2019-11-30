@@ -1,20 +1,15 @@
 const express = require('express');
+const passport = require('./passport');
 
 const router = express.Router();
 
 /* GET home page. */
-router.get('/', (req, res) => {
-  res.render('index');
+router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+  res.render('index', { user: req.user.email });
 });
 
 router.get('/signup', (req, res) => {
   res.render('signup', { message: 'Hit submit when ready.' });
-});
-
-router.post('/signup', (req, res) => {
-  // res.render('signup', { message: 'registred.' });
-  // res.redirect('/api/signup');
-  // res.render('index', { title: 'Express!' });
 });
 
 module.exports = router;
