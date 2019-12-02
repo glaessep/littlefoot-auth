@@ -23,7 +23,10 @@
           <hr />
           <p class="text-success text-center"><%= message %></p>
           <form method="post" action="/api/signup">
-            <input name="salt" type="hidden" value="salt" />
+            <!-- abo -->
+            <input name="abo" type="hidden" value="free" />
+
+            <!-- name -->
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-prepend">
@@ -31,11 +34,23 @@
                     <i class="fa fa-user"></i>
                   </span>
                 </div>
+                <input name="name" class="form-control" placeholder="Name" type="text" />
+              </div>
+            </div>
+
+            <!-- e-mail -->
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="fa fa-envelope"></i>
+                  </span>
+                </div>
                 <input name="email" class="form-control" placeholder="Email" type="email" />
               </div>
-              <!-- input-group.// -->
             </div>
-            <!-- form-group// -->
+
+            <!-- password -->
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-prepend">
@@ -45,9 +60,9 @@
                 </div>
                 <input name="password" class="form-control" placeholder="Password" type="password" />
               </div>
-              <!-- input-group.// -->
             </div>
-            <!-- form-group// -->
+
+            <!-- confirm -->
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-prepend">
@@ -57,15 +72,14 @@
                 </div>
                 <input name="passwordConfirm" class="form-control" placeholder="Confirm Password" type="password" />
               </div>
-              <!-- input-group.// -->
             </div>
-            <!-- form-group// -->
+
+            <!-- button -->
             <div class="form-group">
               <button type="submit" class="btn btn-primary btn-block">
                 Login
               </button>
             </div>
-            <!-- form-group// -->
             <p class="text-center">
               <a href="#" class="btn">Forgot password?</a>
             </p>

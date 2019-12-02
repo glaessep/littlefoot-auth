@@ -5,7 +5,7 @@ const key = process.env.DB_MASTER_KEY; // Add the masterkey of the endpoint
 const client = new CosmosClient({ endpoint, key });
 
 const DatabaseId = process.env.DB_DATABASE_ID;
-const AccountsContainerId = process.env.DB_CONTAINER_ACCOUNTS;
+const AuthContainerId = process.env.DB_CONTAINER_AUTH;
 const ChildrenContainerId = process.env.DB_CONTAINER_CHILDREN;
 const UsersContainerId = process.env.DB_CONTAINER_USERS;
 const TokenSecret = process.env.TOKEN_SECRET; // generated at https://mkjwk.org/
@@ -15,7 +15,7 @@ const CosmosConstants = Constants;
 
 module.exports = {
   TokenSecret,
-  AccountsContainerId,
+  AuthContainerId,
   ChildrenContainerId,
   UsersContainerId,
   database,
