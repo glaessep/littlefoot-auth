@@ -1,6 +1,31 @@
 {
   "window.zoomLevel": 3,
-  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
+  "[typescript]": {
+    "editor.formatOnSave": false
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/dist": true,
+    "**/coverage": true
+  },
+  "typescript.referencesCodeLens.enabled": true,
+  "appService.zipIgnorePattern": [
+    ".vscode{,/**}",
+    "node_modules{,/**}",
+    "src{,/**}",
+    "test{,/**}"
+  ],
   "appService.defaultWebAppToDeploy": "/subscriptions/f6b26989-2d01-477a-9661-d3a4521d1a90/resourceGroups/littlefoot/providers/Microsoft.Web/sites/littlefoot",
   "appService.deploySubpath": "",
   "appService.showBuildDuringDeployPrompt": true
