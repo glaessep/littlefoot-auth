@@ -2,5 +2,6 @@
   "window.zoomLevel": 3,
   "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"],
   "appService.defaultWebAppToDeploy": "/subscriptions/f6b26989-2d01-477a-9661-d3a4521d1a90/resourceGroups/littlefoot/providers/Microsoft.Web/sites/littlefoot",
-  "appService.deploySubpath": ""
+  "appService.deploySubpath": "",
+  "appService.showBuildDuringDeployPrompt": true
 }

@@ -1,4 +1,5 @@
 const uuid4 = require('uuid/v4');
+const { PermissionMode, PermissionResponse } = require('@azure/cosmos');
 
 const jwt = require('../utils/jwt');
 const config = require('../utils/config');
@@ -128,6 +129,21 @@ async function loginAuthAccount(email, password) {
   }
 }
 
+async function setUserPermission(user, resourceId, permissionMode, expirySeconds, partitionKey = '') {
+  const dbUserPermResp = await user.permissions.create(
+    {
+      id: resourceId,
+      permissionMode,
+      resource: config.database.container(resourceId).url,
+      resourcePartitionKey: partitionKey
+    },
+    { resourceTokenExpirySeconds: expirySeconds }
+  );
+  return {
+    //token: { resourceId: dbUserPermResp.resource._token }
+  };
+}
+
 async function createAuthAccount(email, password, name, abo) {
   try {
     let charge = 0.0;
@@ -156,8 +172,34 @@ async function createAuthAccount(email, password, name, abo) {
     const authResp = await config.database.container(config.AuthContainerId).items.create(authData);
     charge += Number(authResp.requestCharge);
 
+    // create cosmos db user
+    const dbUserResp = await db.users.create({ id: userResp.data.userId });
+    charge += Number(dbUserResp.requestCharge);
+
+    // user permissons should be restricted to documents with it's userId
+    const dbUserPermResp = await dbUserResp.user.permissions.create(
+      {
+        id: config.UsersContainerId,
+        permissionMode: PermissionMode.All,
+        resource: config.database.container(config.UsersContainerId).url
+      },
+      { resourceTokenExpirySeconds: 18000 }
+    );
+    charge += Number(dbUserPermResp.requestCharge);
+
+    // dbUserPermResp = await dbUserResp.user.permissions.create(
+    //   {
+    //     id: config.ChildrenContainerId,
+    //     permissionMode: PermissionMode.All,
+    //     resource: 'dbs/vXclAA==/colls/vXclAMYkpJY=/docs/' // `dbs/${config.DatabaseId}/colls/${config.ChildrenContainerId}/docs`
+    //     // resourcePartitionKey: ''
+    //   }
+    //   // { resourceTokenExpirySeconds: 18000 }
+    // );
+    // charge += Number(dbUserPermResp.requestCharge);
+
     // return auth data
-    return genDBResponse(true, authResp, charge);
+    return genDBResponse(true, dbUserPermResp, charge);
   } catch (e) {
     return genDBError(e);
   }
