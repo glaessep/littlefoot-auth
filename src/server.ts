@@ -1,6 +1,7 @@
 // import errorHandler from "errorhandler";
 
 import app from './app';
+import http from 'http';
 
 /**
  * Error Handler. Provides full stack - remove for production
@@ -10,7 +11,9 @@ import app from './app';
 /**
  * Start Express server.
  */
-const server = app.listen(app.get('port'), () => {
+const server = http.createServer(app);
+
+server.listen(app.get('port'), () => {
   const addr = server.address();
   const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
   console.log(`Listening on ${bind}`);
