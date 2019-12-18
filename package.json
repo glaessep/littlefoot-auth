@@ -4,7 +4,7 @@
   "private": true,
   "description": "",
   "scripts": {
-    "start": "node ./dist/server.js",
+    "start": "node ./dist/server",
     "build": "npm run cleanup && npm run build-ts && npm run lint && npm run copy-static-assets",
     "build-deploy": "npm run build-ts && npm run copy-static-assets",
     "watch-node": "nodemon dist/server.js",
