@@ -1,6 +1,5 @@
 import express from 'express';
 import compression from 'compression';  // compresses requests
-import lusca from 'lusca';
 import path from 'path';
 
 import './config/passport';
@@ -21,9 +20,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
 );
-
-// app.use(lusca.xframe('SAMEORIGIN'));
-// app.use(lusca.xssProtection(true));
 
 app.use('/api', apiRouter);
 app.use('/', indexRouter);
