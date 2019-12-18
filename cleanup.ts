@@ -1,3 +1,5 @@
 import * as fs from 'fs';
 
-fs.rmdirSync('dist/', { recursive: true });
+if (fs.existsSync('dist/')) {
+  fs.rmdirSync('dist/', { recursive: true });
+}
