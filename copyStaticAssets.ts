@@ -1,8 +1,9 @@
 import * as shell from 'shelljs';
 import * as fs from 'fs';
 
-fs.rmdirSync('dist/public/', { recursive: true });
-
+if (fs.existsSync('dist/public/')) {
+  fs.rmdirSync('dist/public/', { recursive: true });
+}
 
 const dirs = [
   './src/public/javascript',
