@@ -32,21 +32,18 @@ export default class User {
   
     let charge = 0.0;
     let response: ItemResponse<UserDefinition>;
+    let attempts = maxAttempts;
+    
+    do {
+      // create user in db
+      try {
+        response = await db.container(UsersContainerId).items.create(data);
+        charge = charge + response.requestCharge;
+      } catch (e) {/* do nothing */}
 
-    async () => {
-      let attempts = maxAttempts;
-
-      do {
-        // create user in db
-        try {
-          response = await db.container(UsersContainerId).items.create(data);
-          charge = charge + response.requestCharge;
-        } catch (e) {/* do nothing */}
-
-        // update counter 
-        attempts--;
-      } while ((response.statusCode != HttpStatus.CREATED) && attempts > 0);
-    };
+      // update counter 
+      attempts--;
+    } while ((response.statusCode != HttpStatus.CREATED) && attempts > 0);
   
     // return user data if everything went well
     if (response.statusCode === HttpStatus.CREATED) {

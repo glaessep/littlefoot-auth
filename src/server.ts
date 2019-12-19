@@ -1,5 +1,5 @@
 // import errorHandler from "errorhandler";
-
+import './utils/env';
 import app from './app';
 import http from 'http';
 
