@@ -20,7 +20,9 @@ export async function compare(password: string, encrypted: string): Promise<bool
   const result: boolean = await new Promise((resolve, _reject) => {
     bcrypt.compare(password, encrypted, (err, same) => {
       if (err) {
-        logger.error(` bcrypt.compare(password=${password} encrypted=${encrypted}) returns with message ${err.message}`);
+        logger.error(
+          ` bcrypt.compare(password=${password} encrypted=${encrypted}) returns with message ${err.message}`,
+        );
         resolve(null);
       }
       resolve(same);
@@ -28,5 +30,3 @@ export async function compare(password: string, encrypted: string): Promise<bool
   });
   return result;
 }
-
-

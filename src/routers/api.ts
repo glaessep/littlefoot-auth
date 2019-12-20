@@ -11,9 +11,13 @@ apiRouter.post('/signup', (req, res) => {
   });
 });
 
-apiRouter.get('/signup', (req, res) => { const i = 0;});
+// apiRouter.get('/signup', (req, res) => {
+//   const i = 0;
+// });
 
-apiRouter.get('/signin', (req, res) => { const i = 0;});
+// apiRouter.get('/signin', (req, res) => {
+//   const i = 0;
+// });
 
 apiRouter.post('/signin', (req, res) => {
   const { email, password } = req.body;

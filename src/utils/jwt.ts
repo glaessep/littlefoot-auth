@@ -1,9 +1,14 @@
-
 import { JwtSecret } from './secrets';
 import { sign as _sign, verify as _verify, VerifyErrors, SignOptions, VerifyOptions } from 'jsonwebtoken';
 
-export { JsonWebTokenError, TokenExpiredError, NotBeforeError, VerifyErrors, SignOptions, VerifyOptions } from 'jsonwebtoken';
-
+export {
+  JsonWebTokenError,
+  TokenExpiredError,
+  NotBeforeError,
+  VerifyErrors,
+  SignOptions,
+  VerifyOptions,
+} from 'jsonwebtoken';
 
 export class SignResult {
   readonly err: Error;
@@ -13,7 +18,7 @@ export class SignResult {
     this.err = err;
     this.encoded = encoded;
   }
-};
+}
 
 export class VerifyResult {
   readonly err: VerifyErrors;
@@ -23,8 +28,7 @@ export class VerifyResult {
     this.err = err;
     this.decoded = decoded;
   }
-};
-
+}
 
 export async function sign(payload: string | Buffer | object, options: SignOptions): Promise<SignResult> {
   const o = options;
@@ -37,7 +41,6 @@ export async function sign(payload: string | Buffer | object, options: SignOptio
   });
 }
 
-
 export async function verify(token: string, options: VerifyOptions): Promise<VerifyResult> {
   return await new Promise<VerifyResult>((resolve, _reject) => {
     _verify(token, JwtSecret, options, (err, decoded) => {
@@ -45,4 +48,3 @@ export async function verify(token: string, options: VerifyOptions): Promise<Ver
     });
   });
 }
-

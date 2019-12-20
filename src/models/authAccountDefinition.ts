@@ -15,7 +15,14 @@ export default class AuthAccountDefinition {
   readonly encrypted: string;
   readonly userId: string;
 
-  constructor(mail: string, encrypted: string, userId: string, version = AuthAccountDefinition.version(), emailVerified=false, verifySecret = uuid4()) {
+  constructor(
+    mail: string,
+    encrypted: string,
+    userId: string,
+    version = AuthAccountDefinition.version(),
+    emailVerified = false,
+    verifySecret = uuid4(),
+  ) {
     this.version = version;
     this.email = mail;
     this.emailVerified = emailVerified;
@@ -24,7 +31,9 @@ export default class AuthAccountDefinition {
     this.userId = userId;
   }
 
-  static version(): number { return 1; }
+  static version(): number {
+    return 1;
+  }
 
   verify(verifySecret: string): AuthAccountDefinition {
     if (verifySecret === this.verifySecret) {

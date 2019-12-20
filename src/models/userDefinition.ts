@@ -28,6 +28,10 @@ export default class UserDefinition {
     this.following = [];
   }
 
-  static version(): number { return 1; }
-  static type(): string { return 'user'; }
+  static version(): number {
+    return 1;
+  }
+  static type(): string {
+    return 'user';
+  }
 }
