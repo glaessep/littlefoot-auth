@@ -24,11 +24,11 @@ export class Users {
     if (resources.length === 0) {
       return new UserResult(
         null,
-        new Status(false, requestCharge, HttpStatus.NOT_FOUND, Error('No user with given id.')),
+        new Status(false, Number(requestCharge), HttpStatus.NOT_FOUND, Error('No user with given id.')),
       );
     }
 
-    return new UserResult(resources[0], new Status(true, requestCharge, HttpStatus.OK));
+    return new UserResult(resources[0], new Status(true, Number(requestCharge), HttpStatus.OK));
   }
 
   static async create(email: string, name: string, abo: string): Promise<UserResult> {
@@ -47,7 +47,7 @@ export class Users {
           .container(UsersContainer.id)
           .items.create<User>(data);
 
-        charge = charge + response.requestCharge;
+        charge = charge + Number(response.requestCharge);
       } catch (e) {
         /* do nothing */
       }

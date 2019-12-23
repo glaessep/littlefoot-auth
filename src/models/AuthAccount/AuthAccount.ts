@@ -35,7 +35,7 @@ export class AuthAccount {
 
       return new DbPermissionResult(
         new DbPermission(id, permissionMode, resource, resourcePartitionKey, permissionResponse.resource._token),
-        new Status(true, permissionResponse.requestCharge, HttpStatus.OK),
+        new Status(true, Number(permissionResponse.requestCharge), HttpStatus.OK),
       );
     } catch (e) {
       const err = e as ErrorResponse;
@@ -53,12 +53,12 @@ export class AuthAccount {
     try {
       // fetch all user permissions
       const response = await dbUser.permissions.readAll().fetchAll();
-      charge += response.requestCharge;
+      charge += Number(response.requestCharge);
 
       response.resources.forEach(async permission => {
         //read permission data (and thus new token)
         const { resource, requestCharge } = await dbUser.permission(permission.id).read();
-        charge += requestCharge;
+        charge += Number(requestCharge);
 
         permissions.push(
           new DbPermission(
@@ -92,11 +92,11 @@ export class AuthAccount {
     if (resources.length === 0) {
       return new AuthAccountResult(
         null,
-        new Status(false, requestCharge, HttpStatus.NOT_FOUND, Error('No auth account with given mail.')),
+        new Status(false, Number(requestCharge), HttpStatus.NOT_FOUND, Error('No auth account with given mail.')),
       );
     }
 
-    return new AuthAccountResult(resources[0], new Status(true, requestCharge, HttpStatus.OK));
+    return new AuthAccountResult(resources[0], new Status(true, Number(requestCharge), HttpStatus.OK));
   }
 
   static async create(email: string, password: string, name: string, abo: string): Promise<AuthAccountResult> {
@@ -131,11 +131,11 @@ export class AuthAccount {
 
       // create cosmos db user
       const dbUserResp = await client.database(DatabaseId).users.create({ id: userResp.data.userId });
-      charge += dbUserResp.requestCharge;
+      charge += Number(dbUserResp.requestCharge);
 
       // set write permission for user container
       const permissionUsersContainer = await AuthAccount.setPermission(
-        new DbPermissionDefinition(UsersContainer.id, PermissionMode.All, UsersContainer.url, userResp.data.userId),
+        new DbPermissionDefinition(UsersContainer.id, PermissionMode.All, UsersContainer.url, [userResp.data.userId]),
         dbUserResp.user,
       );
       charge += permissionUsersContainer.status.charge;
@@ -146,7 +146,7 @@ export class AuthAccount {
         .database(DatabaseId)
         .container(AuthContainer.id)
         .items.create(authData);
-      charge += authResp.requestCharge;
+      charge += Number(authResp.requestCharge);
 
       // return auth data
       return new AuthAccountResult(authResp.resource, new Status(true, charge, HttpStatus.CREATED));
@@ -246,7 +246,7 @@ export class AuthAccount {
         .database(DatabaseId)
         .container(AuthContainer.id)
         .items.upsert<AuthAccountDefinition>(verifiedAuthAccount);
-      charge += requestCharge;
+      charge += Number(requestCharge);
 
       return new AuthAccountResult(resource, new Status(true, charge, HttpStatus.OK));
     } catch (e) {
