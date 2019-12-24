@@ -1,4 +1,4 @@
-import { UserDefinition, FollowingDefinition } from './UserDefinition';
+import { UserDefinition, FollowerDefinition } from './UserDefinition';
 import uuid from 'uuid/v4';
 export class User implements UserDefinition {
   /** implements { @link UserDefinition } */
@@ -9,7 +9,7 @@ export class User implements UserDefinition {
   name: string;
   email: string;
   abo: string;
-  following: FollowingDefinition[];
+  following: FollowerDefinition[];
 
   constructor(email: string, name: string, abo: string, userId: string = uuid()) {
     this.version = User.version();

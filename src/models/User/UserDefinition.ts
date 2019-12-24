@@ -1,5 +1,6 @@
-export interface FollowingDefinition {
-  childId: string;
+export interface FollowerDefinition {
+  /** Is childId or userId */
+  id: string;
   permission: string;
 }
 
@@ -11,5 +12,5 @@ export interface UserDefinition {
   name: string;
   email: string;
   abo: string;
-  following: FollowingDefinition[];
+  following: FollowerDefinition[];
 }

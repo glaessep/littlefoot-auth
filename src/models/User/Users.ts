@@ -64,4 +64,35 @@ export class Users {
     // return null if don't find a new id
     return new UserResult(response.resource, new Status(true, charge, response.statusCode));
   }
+
+  static async delete(userId: string): Promise<Status> {
+    /**
+     * Deletes following entries:
+     *  1) ChildrenContainer
+     *    - For each item in user.following:
+     *      - query(type == 'child' && childId == item.id) => remove entry from child.followers where id == userId
+     *    - For each item in user.children:
+     *      - query(type == 'child' && childId == item.id) => remove entry from child.parents where userId == userId
+     *        - if (child.authorId == userId) => delete child document (recursively)
+     *        - if (child.parents is empty) => delete child document (recursively)
+     *  2) UserContainer
+     *    - query(type == 'user' && userId == userId) => complete document
+     *    - query(type == 'feed' && userId == userId) => complete document
+     */
+
+    /** Step one (skip) */
+
+    /** Step two */
+    const response = await client
+      .database(DatabaseId)
+      .container(UsersContainer.id)
+      .item(userId, userId)
+      .delete();
+
+    return new Status(
+      response.statusCode === HttpStatus.NO_CONTENT,
+      Number(response.requestCharge),
+      response.statusCode,
+    );
+  }
 }

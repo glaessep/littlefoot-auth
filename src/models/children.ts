@@ -19,7 +19,7 @@
 //   ],
 //   followers: [
 //     {
-//       userId,
+//       id,
 //       permission
 //     }
 //   ]

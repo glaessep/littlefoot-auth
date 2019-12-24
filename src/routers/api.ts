@@ -1,16 +1,16 @@
 import { Router } from 'express';
 
-import { AuthAccount } from '../models/AuthAccount';
+import { AuthAccounts } from '../models/AuthAccount';
 
 export const apiRouter = Router();
 
 apiRouter.post('/signup', (req, res) => {
   const { email, password, name, abo } = req.body;
-  AuthAccount.create(email, password, name, abo)
+  AuthAccounts.create(email, password, name, abo)
     .then(result => {
       res.status(result.status.code).json(result);
     })
-    .catch(e => {
+    .catch(_e => {
       // // check NotBeforeError
       // if (err.name === 'NotBeforeError') {
       //   return new DbResult<Error>(false, Error('JWT not before error.'), charge, HttpStatus.UNAUTHORIZED);
@@ -34,9 +34,16 @@ apiRouter.post('/signup', (req, res) => {
 //   const i = 0;
 // });
 
-apiRouter.post('/signin', (req, res) => {
+apiRouter.post('/login', (req, res) => {
   const { email, password } = req.body;
-  AuthAccount.login(email, password).then(result => {
+  AuthAccounts.login(email, password).then(result => {
     res.status(result.status.code).json(result);
+  });
+});
+
+apiRouter.post('/delete', (req, res) => {
+  const { email, userId } = req.body;
+  AuthAccounts.delete(email, userId).then(result => {
+    res.status(result.code).json(result);
   });
 });

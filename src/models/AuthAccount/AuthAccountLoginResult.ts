@@ -1,13 +1,18 @@
-import { AuthAccountDefinition } from './AuthAccountDefinition';
+import { AuthAccount } from './AuthAccount';
 import { DbPermissions } from '../DbPermission';
-import { Status, Result } from '../../common';
+import { Status, Result, Id } from '../../common';
 import { AuthToken } from './AuthToken';
-export class AuthAccountLoginResult extends Result<AuthAccountDefinition> {
+export class AuthAccountLoginResult extends Result<AuthAccount & Id> {
   readonly permission: {
     auth: AuthToken;
     db: DbPermissions;
   };
-  constructor(definition: AuthAccountDefinition, authToken: AuthToken, dbpermissions: DbPermissions, status: Status) {
+  constructor(
+    definition: AuthAccount & { id: string },
+    authToken: AuthToken,
+    dbpermissions: DbPermissions,
+    status: Status,
+  ) {
     super(definition, status);
     this.permission.auth = authToken;
     this.permission.db = dbpermissions;
