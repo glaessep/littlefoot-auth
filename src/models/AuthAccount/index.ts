@@ -1,3 +1,4 @@
+export * from './AuthAccount';
 export * from './AuthAccounts';
 export * from './AuthAccountDefinition';
 export * from './AuthAccountLoginResult';
