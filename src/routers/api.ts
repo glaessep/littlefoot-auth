@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import passport from 'passport';
 
 import { AuthAccounts } from '../models/AuthAccount';
 
@@ -26,23 +27,16 @@ apiRouter.post('/signup', (req, res) => {
     });
 });
 
-// apiRouter.get('/signup', (req, res) => {
-//   const i = 0;
-// });
-
-// apiRouter.get('/signin', (req, res) => {
-//   const i = 0;
-// });
-
 apiRouter.post('/login', (req, res) => {
   const { email, password } = req.body;
   AuthAccounts.login(email, password).then(result => {
-    res.status(result.status.code).json(result);
+    res.status(result.status.code).json(result.data);
   });
 });
 
-apiRouter.post('/delete', (req, res) => {
-  const { email, userId } = req.body;
+apiRouter.post('/delete', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const { email, userId } = req.user as { email: string; userId: string };
+
   AuthAccounts.delete(email, userId).then(result => {
     res.status(result.code).json(result);
   });
