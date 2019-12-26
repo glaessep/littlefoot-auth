@@ -1,11 +1,21 @@
 import * as shell from 'shelljs';
 import * as fs from 'fs';
+import path from 'path';
 
-if (fs.existsSync('dist/public/')) {
-  fs.rmdirSync('dist/public/', { recursive: true });
-}
+const src = './src/public';
+const dist = './dist/public';
+const dirs = ['css', 'fonts', 'images'];
 
-const dirs = ['./src/public/javascript', './src/public/css', './src/public/fonts', './src/public/images'];
+dirs.map(d => {
+  const distEntry = path.join(dist, d);
+  const srcEntry = path.join(src, d);
+  if (fs.existsSync(distEntry)) {
+    fs.rmdirSync(distEntry, { recursive: true });
+  }
 
-shell.mkdir('-p', './dist/public');
-shell.cp('-R', dirs, './dist/public');
+  if (!fs.existsSync(dist)) {
+    shell.mkdir('-p', dist);
+  }
+
+  shell.cp('-R', srcEntry, dist);
+});

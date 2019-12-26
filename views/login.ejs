@@ -13,19 +13,48 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" />
-    <title>Littlefoot</title>
+    <title>Login</title>
   </head>
   <body>
-    <div class="container">
-      <h1>Welcome to Littlefoot</h1>
-      <p>You are logged in as <%= email %> (<%= userId %>)</p>
-      </br></br>
-      <ul class="list-group text-center">
-        <a href="./signup" class="list-group-item">signup</a>
-        <a href="./login" class="list-group-item">login</a>
-        <a href="#" onClick="remove()" class="list-group-item">delete</a>
-      </ul>  
+    <div class="container pt-2">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title text-center mb-4 mt-1">Login</h4>
+          <hr />
+
+          <!-- message -->
+          <p class="text-success text-center"><%= message %></p>
+
+          <!-- e-mail -->
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text">
+                <i class="fa fa-envelope"></i>
+              </span>
+            </div>
+            <input id="email" class="form-control" placeholder="Email" type="email" />
+          </div>
+
+          <!-- password -->
+          <div class="input-group mb-5">
+            <div class="input-group-prepend">
+              <span class="input-group-text">
+                <i class="fa fa-lock"></i>
+              </span>
+            </div>
+            <input id="password" class="form-control" placeholder="Password" type="password" />
+          </div>
+
+          <!-- button -->
+          <button onClick="login()" class="btn btn-primary btn-block mb-3">
+            Login
+          </button>
+          <p class="text-center">No account? <a href="/signup">Create.</a></p>
+        </div>
+      </div>
+      <!-- card.// -->
     </div>
+    <!--container end.//-->
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

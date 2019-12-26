@@ -1,11 +1,11 @@
 {
   "name": "littlefoot-server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "",
   "scripts": {
     "start": "node ./dist/server",
-    "build": "npm run cleanup && npm run build-ts && npm run lint && npm run copy-static-assets",
+    "build": "npm run cleanup && npm run copy-static-assets && npm run build-ts && npm run lint",
     "build-deploy": "npm run build-ts && npm run copy-static-assets",
     "watch-node": "nodemon dist/server.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
@@ -18,7 +18,7 @@
     "cleanup": "ts-node cleanup.ts",
     "debug": "npm run build && npm run watch-debug",
     "serve-debug": "nodemon --inspect dist/server.js",
-    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
+    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node,Assets\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
     "@azure/cosmos": "^3.5.2",

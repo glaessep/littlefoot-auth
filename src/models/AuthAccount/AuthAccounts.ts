@@ -6,7 +6,7 @@ import * as crypto from '../../utils/crypto';
 import { AuthAccountDefinition } from './AuthAccountDefinition';
 import { Status, ContainerDefinition, Id } from '../../common';
 import { Users } from '../User';
-import { AuthAccountLoginResult } from './AuthAccountLoginResult';
+import { AuthAccountPermissionResult } from './AuthAccountPermissionResult';
 import { AuthAccountResult } from './AuthAccountResult';
 import { User as DbUser, ErrorResponse, PermissionMode } from '@azure/cosmos';
 import {
@@ -53,18 +53,19 @@ export class AuthAccounts {
   }
 
   private static async getPermissions(userId: string): Promise<DbPermissionsResult> {
-    // get db user
-    const dbUser = client.database(DatabaseId).user(userId);
-
-    let permissions: DbPermissions;
-    let charge = 0;
-
     try {
+      // get db user
+      const dbUser = client.database(DatabaseId).user(userId);
+
+      const permissions: DbPermissions = [];
+      let charge = 0;
+
       // fetch all user permissions
       const response = await dbUser.permissions.readAll().fetchAll();
       charge += Number(response.requestCharge);
 
-      response.resources.forEach(async permission => {
+      for (const permission of response.resources) {
+        // await response.resources.forEach(async permission => {
         //read permission data (and thus new token)
         const { resource, requestCharge } = await dbUser.permission(permission.id).read();
         charge += Number(requestCharge);
@@ -78,12 +79,12 @@ export class AuthAccounts {
             resource._token,
           ),
         );
-      });
+      }
+      return new DbPermissionsResult(permissions, new Status(true, charge, HttpStatus.OK));
     } catch (e) {
       const err = e as ErrorResponse;
       return new DbPermissionsResult(null, new Status(false, 0, err.code, err));
     }
-    return new DbPermissionsResult(permissions, new Status(true, charge, HttpStatus.OK));
   }
 
   static async find(email: string): Promise<AuthAccountResult> {
@@ -213,7 +214,7 @@ export class AuthAccounts {
     return new Status(true, charge, HttpStatus.NO_CONTENT);
   }
 
-  static async login(email: string, password: string): Promise<AuthAccountLoginResult> {
+  static async login(email: string, password: string): Promise<AuthAccountPermissionResult> {
     try {
       let charge = 0;
 
@@ -221,9 +222,7 @@ export class AuthAccounts {
       charge += authAccount.status.charge;
 
       if (!authAccount.status.success) {
-        return new AuthAccountLoginResult(
-          null,
-          null,
+        return new AuthAccountPermissionResult(
           null,
           new Status(false, authAccount.status.charge, HttpStatus.FORBIDDEN, Error('Incorrect username or password.')),
         );
@@ -231,9 +230,7 @@ export class AuthAccounts {
 
       const same = await crypto.compare(password, authAccount.data.encrypted);
       if (!same) {
-        return new AuthAccountLoginResult(
-          null,
-          null,
+        return new AuthAccountPermissionResult(
           null,
           new Status(false, authAccount.status.charge, HttpStatus.FORBIDDEN, Error('Incorrect username or password.')),
         );
@@ -243,9 +240,7 @@ export class AuthAccounts {
 
       // check if signing went wrong
       if (err !== null) {
-        return new AuthAccountLoginResult(
-          null,
-          null,
+        return new AuthAccountPermissionResult(
           null,
           new Status(false, authAccount.status.charge, HttpStatus.FORBIDDEN, err),
         );
@@ -255,16 +250,12 @@ export class AuthAccounts {
       const permissions = await AuthAccounts.getPermissions(authAccount.data.userId);
       charge += permissions.status.charge;
 
-      return new AuthAccountLoginResult(
-        authAccount.data,
-        { token },
-        permissions.data,
+      return new AuthAccountPermissionResult(
+        { auth: { token }, database: permissions.data },
         new Status(true, charge, HttpStatus.OK),
       );
     } catch (e) {
-      return new AuthAccountLoginResult(
-        null,
-        null,
+      return new AuthAccountPermissionResult(
         null,
         new Status(false, 0, HttpStatus.INTERNAL_SERVER_ERROR, Error('Login failed due to a internal error.')),
       );
