@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from './logger';
 
 export const redirectToWWW = function(req: Request, res: Response, next: NextFunction) {
   const hostHeader = req.header('host');
@@ -8,5 +7,15 @@ export const redirectToWWW = function(req: Request, res: Response, next: NextFun
     next();
   } else {
     res.redirect(301, 'https://www.' + hostHeader + req.url);
+  }
+};
+
+export const removeWww = function(req: Request, res: Response, next: NextFunction) {
+  const host = req.header('host');
+  const www = (host || '').split('.')[0];
+  if (www.toLowerCase() !== 'www') {
+    next();
+  } else {
+    res.redirect(301, 'https://' + host.replace('www.', '') + req.url);
   }
 };
