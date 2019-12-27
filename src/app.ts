@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import compression from 'compression'; // compresses requests
 import path from 'path';
 
@@ -14,6 +15,8 @@ const app = express();
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, './../views'));
 app.set('view engine', 'ejs');
+
+app.use(helmet());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
