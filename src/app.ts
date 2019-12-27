@@ -5,6 +5,7 @@ import path from 'path';
 import './config/passport';
 import { indexRouter } from './routers';
 import { apiRouter } from './routers/api';
+import { redirectToWWW } from './utils/redirectToWWW';
 
 // Create Express server
 const app = express();
@@ -17,6 +18,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
+app.all(/.*/, redirectToWWW);
 
 app.use('/api', apiRouter);
 app.use('/', indexRouter);
