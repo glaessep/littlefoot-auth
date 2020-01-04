@@ -16,7 +16,7 @@ async function signup(): Promise<void> {
     abo: 'free',
   };
 
-  const response = await fetch('/api/signup', {
+  const response = await fetch('/signup', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ async function login(): Promise<void> {
     password,
   };
 
-  const response = await fetch('/api/login', {
+  const response = await fetch('/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ async function login(): Promise<void> {
   });
 
   if (response.ok) {
-    const result = (await response.json()) as AuthDefinition;
+    const result = (await response.json()).data as AuthDefinition;
     console.log(result);
 
     window.location.replace(`/?auth_token=${result.auth.token}`);
@@ -67,7 +67,7 @@ async function remove(): Promise<void> {
     return;
   }
 
-  const response = await fetch('/api/delete', {
+  const response = await fetch('/delete', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

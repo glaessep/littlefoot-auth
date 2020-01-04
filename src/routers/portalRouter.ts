@@ -4,7 +4,7 @@ import passport from 'passport';
 export const portalRouter = Router();
 
 /* GET home page. */
-portalRouter.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+portalRouter.get('/', passport.authenticate('jwt', { session: false, failureRedirect: '/login' }), (req, res) => {
   const user = req.user as { email: string; userId: string };
   res.render('index', { email: user.email, userId: user.userId });
 });
