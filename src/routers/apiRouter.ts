@@ -2,6 +2,7 @@ import { Router } from 'express';
 import passport from 'passport';
 
 import { AuthAccounts } from '../models/AuthAccount';
+import { Result } from 'littlefoot-api';
 
 export const apiRouter = Router();
 
@@ -30,7 +31,7 @@ apiRouter.post('/signup', (req, res) => {
 apiRouter.post('/login', (req, res) => {
   const { email, password } = req.body;
   AuthAccounts.login(email, password).then(result => {
-    res.status(result.status.code).json(result.data);
+    res.status(result.status.code).json(result);
   });
 });
 
@@ -38,6 +39,6 @@ apiRouter.post('/delete', passport.authenticate('jwt', { session: false }), (req
   const { email, userId } = req.user as { email: string; userId: string };
 
   AuthAccounts.delete(email, userId).then(result => {
-    res.status(result.code).json(result);
+    res.status(result.code).json(new Result({}, result));
   });
 });

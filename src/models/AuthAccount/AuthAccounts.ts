@@ -1,25 +1,26 @@
 import * as HttpStatus from 'http-status-codes';
+import { User as DbUser, ErrorResponse } from '@azure/cosmos';
+import {
+  Status,
+  // Id,
+  AuthAccountDefinition,
+  AuthAccountResult,
+  AuthAccountPermissionResult,
+  ResourcePermissionMode,
+} from 'littlefoot-api';
 
 import { Jwt } from '../../utils/Jwt';
 import { client, DatabaseId, ResourceTokenExpirySeconds, UsersContainer, AuthContainer } from '../../config/db';
 import * as crypto from '../../utils/crypto';
-import { AuthAccountDefinition } from './AuthAccountDefinition';
-import { Status, ContainerDefinition, Id } from '../../common';
+import { ContainerDefinition } from '../../common';
 import { Users } from '../User';
-import { AuthAccountPermissionResult } from './AuthAccountPermissionResult';
-import { AuthAccountResult } from './AuthAccountResult';
-import { User as DbUser, ErrorResponse, PermissionMode } from '@azure/cosmos';
-import {
-  DbPermission,
-  DbPermissionDefinition,
-  DbPermissionResult,
-  DbPermissions,
-  DbPermissionsResult,
-} from '../DbPermission';
 import { AuthAccount } from './AuthAccount';
+import { DbPermission, DbPermissionMode, ResourcePermissionResult } from '../ResourcePermission';
+import { ResourcePermission, ResourcePermissionsResult } from '../ResourcePermission';
+import { AuthAccountFindResult } from './AuthAccountFindResult';
 
 export class AuthAccounts {
-  private static verify(data: AuthAccountDefinition, verifySecret: string): boolean {
+  private static verify(data: AuthAccount, verifySecret: string): boolean {
     if (verifySecret === data.verifySecret) {
       return true;
     }
@@ -28,13 +29,27 @@ export class AuthAccounts {
 
   private static async setPermission(
     container: ContainerDefinition,
-    mode: PermissionMode,
+    mode: ResourcePermissionMode,
     partitionKeys: string[],
     dbUser: DbUser,
-  ): Promise<DbPermissionResult> {
+  ): Promise<ResourcePermissionResult> {
     try {
+      // convert permission mode
+      let dbMode = DbPermissionMode.None;
+      if (mode === ResourcePermissionMode.All) {
+        dbMode = DbPermissionMode.All;
+      } else if (mode === ResourcePermissionMode.Read) {
+        dbMode = DbPermissionMode.Read;
+      } else {
+        return new ResourcePermissionResult(
+          null,
+          new Status(false, 0, HttpStatus.BAD_REQUEST, new Error('Wrong permission mode.')),
+        );
+      }
+
+      // set permission
       const permissionResponse = await dbUser.permissions.upsert(
-        new DbPermissionDefinition(container.id, mode, container.url, partitionKeys),
+        new DbPermission(container.id, dbMode, container.url, partitionKeys),
         {
           resourceTokenExpirySeconds: ResourceTokenExpirySeconds,
         },
@@ -42,22 +57,41 @@ export class AuthAccounts {
 
       const { id, permissionMode, resource, resourcePartitionKey } = permissionResponse.resource;
 
-      return new DbPermissionResult(
-        new DbPermission(id, permissionMode, resource, resourcePartitionKey, permissionResponse.resource._token),
+      // convert permission mode
+      let outPermissionMode = ResourcePermissionMode.None;
+      if (permissionMode === DbPermissionMode.All) {
+        outPermissionMode = ResourcePermissionMode.All;
+      } else if (permissionMode === DbPermissionMode.Read) {
+        outPermissionMode = ResourcePermissionMode.Read;
+      } else {
+        return new ResourcePermissionResult(
+          null,
+          new Status(false, 0, HttpStatus.BAD_REQUEST, new Error('Wrong permission mode.')),
+        );
+      }
+
+      return new ResourcePermissionResult(
+        new ResourcePermission(
+          id,
+          outPermissionMode,
+          resource,
+          resourcePartitionKey,
+          permissionResponse.resource._token,
+        ),
         new Status(true, Number(permissionResponse.requestCharge), HttpStatus.OK),
       );
     } catch (e) {
       const err = e as ErrorResponse;
-      return new DbPermissionResult(null, new Status(false, 0, err.code, err));
+      return new ResourcePermissionResult(null, new Status(false, 0, err.code, err));
     }
   }
 
-  private static async getPermissions(userId: string): Promise<DbPermissionsResult> {
+  private static async getPermissions(userId: string): Promise<ResourcePermissionsResult> {
     try {
       // get db user
       const dbUser = client.database(DatabaseId).user(userId);
 
-      const permissions: DbPermissions = [];
+      const permissions: ResourcePermission[] = [];
       let charge = 0;
 
       // fetch all user permissions
@@ -65,51 +99,42 @@ export class AuthAccounts {
       charge += Number(response.requestCharge);
 
       for (const permission of response.resources) {
-        // await response.resources.forEach(async permission => {
         //read permission data (and thus new token)
-        const { resource, requestCharge } = await dbUser.permission(permission.id).read();
-        charge += Number(requestCharge);
+        const permissionResponse = await dbUser.permission(permission.id).read();
+        charge += Number(permissionResponse.requestCharge);
 
-        permissions.push(
-          new DbPermission(
-            resource.id,
-            resource.permissionMode,
-            resource.resource,
-            resource.resourcePartitionKey,
-            resource._token,
-          ),
-        );
+        permissions.push(ResourcePermission.fromCosmos(permissionResponse));
       }
-      return new DbPermissionsResult(permissions, new Status(true, charge, HttpStatus.OK));
+      return new ResourcePermissionsResult(permissions, new Status(true, charge, HttpStatus.OK));
     } catch (e) {
       const err = e as ErrorResponse;
-      return new DbPermissionsResult(null, new Status(false, 0, err.code, err));
+      return new ResourcePermissionsResult(null, new Status(false, 0, err.code, err));
     }
   }
 
-  static async find(email: string): Promise<AuthAccountResult> {
+  static async find(email: string): Promise<AuthAccountFindResult> {
     try {
       const query = {
         query: 'SELECT * FROM r WHERE r.email=@email',
         parameters: [{ name: '@email', value: `${email}` }],
       };
-
+      // @TODO: Removed Id => check this
       const { resources, requestCharge } = await client
         .database(DatabaseId)
         .container(AuthContainer.id)
-        .items.query<AuthAccount & Id>(query)
+        .items.query<AuthAccount>(query)
         .fetchAll();
 
       if (resources.length === 0) {
-        return new AuthAccountResult(
+        return new AuthAccountFindResult(
           null,
           new Status(false, Number(requestCharge), HttpStatus.NOT_FOUND, Error('No auth account with given mail.')),
         );
       }
 
-      return new AuthAccountResult(resources[0], new Status(true, Number(requestCharge), HttpStatus.OK));
+      return new AuthAccountFindResult(resources[0], new Status(true, Number(requestCharge), HttpStatus.OK));
     } catch (e) {
-      return new AuthAccountResult(null, new Status(false, 0, HttpStatus.NOT_FOUND, e));
+      return new AuthAccountFindResult(null, new Status(false, 0, HttpStatus.NOT_FOUND, e));
     }
   }
 
@@ -150,7 +175,7 @@ export class AuthAccounts {
       // Set write permission for user container
       const permissionUsersContainer = await AuthAccounts.setPermission(
         UsersContainer,
-        PermissionMode.All,
+        ResourcePermissionMode.All,
         [userResp.data.userId],
         dbUserResp.user,
       );

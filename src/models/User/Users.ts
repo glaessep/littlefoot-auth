@@ -1,9 +1,9 @@
 import * as HttpStatus from 'http-status-codes';
 import { ItemResponse } from '@azure/cosmos';
+import { Status } from 'littlefoot-api';
 import { client, DatabaseId, MaxAttemptsDbUser, UsersContainer } from '../../config/db';
 import { User } from './User';
 import { UserResult } from './UserResult';
-import { Status } from '../../common';
 
 export class Users {
   static async find(userId: string): Promise<UserResult> {

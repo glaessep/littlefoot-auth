@@ -21,6 +21,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
+app.use(express.static(path.join(__dirname, 'src', 'public'), { maxAge: 31557600000 }));
 app.all(/.*/, removeWww);
 
 app.use('/', apiRouter);
