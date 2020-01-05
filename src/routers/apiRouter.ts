@@ -35,7 +35,7 @@ apiRouter.post('/login', (req, res) => {
   });
 });
 
-apiRouter.post('/delete', passport.authenticate('jwt', { session: false }), (req, res) => {
+apiRouter.post('/delete', passport.authenticate('jwt', { session: false, failureRedirect: '/login' }), (req, res) => {
   const { email, userId } = req.user as { email: string; userId: string };
 
   AuthAccounts.delete(email, userId).then(result => {
