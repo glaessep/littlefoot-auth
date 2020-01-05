@@ -213,8 +213,10 @@ export class AuthAccounts {
     /** Only execute if we have an userId. */
     if (userId) {
       /** Delete user. */
-      const userStatus = await Users.delete(userId);
-      charge += userStatus.charge;
+      try {
+        const userStatus = await Users.delete(userId);
+        charge += userStatus.charge;
+      } catch (_e) {}
 
       /** Delete db user. */
       try {
