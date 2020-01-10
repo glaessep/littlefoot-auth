@@ -42,8 +42,8 @@ stages:
       - script: |
           cd $(System.DefaultWorkingDirectory)
           pwd
-          rm -rfv $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-          zip -r $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip dist node_modules views package.json
+          rm -rfv $(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip
+          zip -r $(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip dist node_modules views package.json
         displayName: 'Archive Files'
 
       - task: PublishBuildArtifacts@1
