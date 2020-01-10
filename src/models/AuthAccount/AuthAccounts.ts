@@ -2,14 +2,13 @@ import * as HttpStatus from 'http-status-codes';
 import { User as DbUser, ErrorResponse } from '@azure/cosmos';
 import {
   Status,
-  // Id,
   AuthAccountDefinition,
   AuthAccountResult,
   AuthAccountPermissionResult,
   ResourcePermissionMode,
 } from 'littlefoot-api';
 
-import { Jwt } from '../../utils/Jwt';
+import { Jwt } from '../../utils/jwt';
 import { client, DatabaseId, ResourceTokenExpirySeconds, UsersContainer, AuthContainer } from '../../config/db';
 import * as crypto from '../../utils/crypto';
 import { ContainerDefinition } from '../../common';

@@ -1,3 +1,3 @@
 import { Result } from 'littlefoot-api';
-import { User } from './user';
+import { User } from './User';
 export class UserResult extends Result<User> {}
