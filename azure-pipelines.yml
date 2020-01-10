@@ -1,0 +1,80 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+stages:
+- stage: Build
+  jobs:
+    - job: Build
+
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+      - task: UseNode@1
+        inputs:
+          version: 12.x
+
+      - task: Npm@1
+        displayName: 'npm ci'
+        inputs:
+          command: ci
+          verbose: false
+
+      - task: Npm@1
+        displayName: 'npm build'
+        inputs:
+          command: custom
+          verbose: false
+          customCommand: 'run build-deploy'
+
+      - task: Npm@1
+        displayName: 'npm ci --production'
+        inputs:
+          command: custom
+          verbose: false
+          customCommand: 'ci --production'
+
+      - script: |
+          cd $(System.DefaultWorkingDirectory)
+          pwd
+          rm -rfv $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+          zip -r $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip dist node_modules views package.json
+        displayName: 'Archive Files'
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: littlefoot-auth'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'littlefoot-auth'
+          publishLocation: 'Container'
+
+- stage: Deploy
+  jobs:
+    - job: Deploy
+
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'littlefoot-auth'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: AzureRmWebAppDeployment@4
+        displayName: 'Deploy Azure App Service'
+        inputs:
+          ConnectionType: 'AzureRM'
+          azureSubscription: 'Littlefoot subscription (f6b26989-2d01-477a-9661-d3a4521d1a90)'
+          appType: 'webAppLinux'
+          WebAppName: 'auth-littlefoot'
+          packageForLinux: '$(System.ArtifactsDirectory)/littlefoot-auth/*.zip'
+          RuntimeStack: 'NODE|12-lts'
+          StartupCommand: 'npm run start'
