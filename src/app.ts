@@ -25,6 +25,6 @@ app.use(express.static(path.join(__dirname, 'src', 'public'), { maxAge: 31557600
 app.all(/.*/, removeWww);
 
 app.use('/', apiRouter);
-app.use('/', portalRouter);
+// app.use('/', portalRouter);
 
 export default app;
