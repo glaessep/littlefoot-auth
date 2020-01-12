@@ -2,11 +2,14 @@ import express from 'express';
 import helmet from 'helmet';
 import compression from 'compression'; // compresses requests
 import path from 'path';
+import * as sourceMaps from 'source-map-support';
 
 import './config/passport';
 // import { portalRouter } from './routers/portalRouter';
 import { apiRouter } from './routers/apiRouter';
 import { removeWww } from './utils/redirectToUrl';
+
+sourceMaps.install({ environment: 'node' });
 
 // Create Express server
 const app = express();
