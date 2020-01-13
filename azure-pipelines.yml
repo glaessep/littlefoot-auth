@@ -15,29 +15,41 @@ stages:
         vmImage: 'ubuntu-latest'
 
       steps:
-      - task: UseNode@1
-        inputs:
-          version: 12.x
+      # - task: UseNode@1
+      #   inputs:
+      #     version: 12.x
 
-      - task: Npm@1
-        displayName: 'npm ci'
-        inputs:
-          command: ci
-          verbose: false
+      # - task: Npm@1
+      #   displayName: 'npm ci'
+      #   inputs:
+      #     command: ci
+      #     verbose: false
 
-      - task: Npm@1
+      # - task: Npm@1
+      #   displayName: 'npm build'
+      #   inputs:
+      #     command: custom
+      #     verbose: false
+      #     customCommand: 'run build-deploy'
+
+      # - task: Npm@1
+      #   displayName: 'npm ci --production'
+      #   inputs:
+      #     command: custom
+      #     verbose: false
+      #     customCommand: 'ci --production'
+
+      - script: |
+          npm install
+        displayName: 'npm install'
+
+      - script: |
+          npm run build-deploy
         displayName: 'npm build'
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: 'run build-deploy'
 
-      - task: Npm@1
-        displayName: 'npm ci --production'
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: 'ci --production'
+      - script: |
+          npm install --production
+        displayName: 'npm install --production'
 
       - script: |
           cd $(System.DefaultWorkingDirectory)
